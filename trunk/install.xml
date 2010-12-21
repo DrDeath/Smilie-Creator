@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml-stylesheet type="text/xsl" href="./contrib/modx.prosilver.en.xsl"?>
+<!--For security purposes, please check: http://www.phpbb.com/mods/ for the latest version of this MOD. Although MODs are checked before being allowed in the MODs Database there is no guarantee that there are no security problems within the MOD. No support will be given for MODs not found within the MODs Database which can be found at http://www.phpbb.com/mods/-->
+<mod xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.phpbb.com/mods/xml/modx-1.2.3.xsd">
+	<header>
+		<license>http://opensource.org/licenses/gpl-license.php GNU General Public License v2</license>
+
+		<title lang="en-gb">Smilie Creator</title>
+		<title lang="de">Smilie Creator</title>
+
+		<description lang="en-gb"><![CDATA[With this mod you can add some smilie signs to your forum.
+		Use this MOD as a custom bbcode or with a smilie creator popup.]]></description>
+		<description lang="de"><![CDATA[Mit diesem MOD fügst Du Deinem Forum Smilie Schilder hinzu.
+		Du kannst diesen MOD als einzelnen BBCode benutzen oder über ein Smilie Creator Popup steuern.]]></description>
+
+		<author-notes lang="en-gb"><![CDATA[- Dr.Death and nickvergessen ported and enhanced the origin phpBB2 MOD to phpBB3
+		- esperitox is the origin author of the Smilie Creator 1.0.3 MOD for phpBB2.]]></author-notes>
+		<author-notes lang="de"><![CDATA[- Dr.Death und nickvergessen haben das Original phpBB2 MOD auf phpBB3 Olympus portiert ( Neu programmiert und angepasst )
+		- esperitox ist der Autor des Smilie Creator 1.0.3 MOD für phpBB2.]]></author-notes>
+
+		<author-group>
+			<author>
+				<realname>Stefan Temath</realname>
+				<email>dr.death@lpi-clan.de</email>
+				<username>Dr.Death</username>
+				<homepage>http://www.lpi-clan.de</homepage>
+				<contributions-group>
+					<contributions status="past" from="2006-01-01" position="Developer"/>
+				</contributions-group>	
+			</author>
+			<author>
+				<realname>nickvergessen</realname>
+				<email>nickvergessen@gmx.de</email>
+				<username>nickvergessen</username>
+				<homepage>http://www.flying-bits.org</homepage>
+			</author>
+		</author-group>
+
+		<mod-version>1.0.7</mod-version>
+
+		<installation>
+			<level>easy</level>
+			<time>600</time>
+			<target-version>3.0.4</target-version>
+		</installation>
+
+		<link-group>
+			<link type="parent" lang="en-gb" href="contrib/history.xml">History</link>
+			<link type="parent" lang="de" href="contrib/history.xml">Historie</link>
+			<link type="language" lang="en-gb" href="contrib/de.xml">Manual for german language-set</link>
+			<link type="language" lang="de" href="contrib/de.xml">Anleitung für das deutsche Sprachpaket</link>
+			<link type="language" lang="en-gb" href="contrib/fr.xml">Manual for french language-set</link>
+			<link type="language" lang="de" href="contrib/fr.xml">Anleitung für das französische Sprachpaket</link>
+			<link type="template" lang="en-gb" href="contrib/subsilver2.xml">Manual for subsilver2 style</link>
+			<link type="template" lang="de" href="contrib/subsilver2.xml">Anleitung für das Style subsilver2</link>
+		</link-group>
+
+		<meta name="generator" content="Phpbb.ModTeam.Tools (c#)" />
+		
+	</header>
+	
+	<action-group>
+	    <copy>
+			<file from="root/smilie_creator.php" to="smilie_creator.php" />
+			<file from="root/text2schild.php" to="text2schild.php" />
+			<file from="root/adm/mods/smilie_creator_version.php" to="adm/mods/smilie_creator_version.php" />
+			<file from="root/language/en/mods/lang_smilie_creator.php" to="language/en/mods/lang_smilie_creator.php" />
+			<file from="root/styles/prosilver/template/smilie_creator.html" to="styles/prosilver/template/smilie_creator.html" />
+			<file from="root/images/smilie_creator/*.*" to="images/smilie_creator/*.*" />
+	    </copy>
+		
+		<open src="posting.php">
+			<edit>
+				<find><![CDATA[$user->setup(array('posting', 'mcp', 'viewtopic'), $post_data['forum_style']);]]></find>
+				<action type="after-add"><![CDATA[$user->add_lang('mods/lang_smilie_creator');]]></action>
+			</edit>
+		</open>
+		
+		<open src="includes/bbcode.php">
+			<edit>
+				<find><![CDATA[	function bbcode_second_pass(&$message, $bbcode_uid = '', $bbcode_bitfield = false)
+	{]]></find>
+				<action type="after-add"><![CDATA[		global $phpbb_root_path;]]></action>
+			</edit>
+			<edit>
+				<find><![CDATA[		// Remove the uid from tags that have not been transformed into HTML
+		$message = str_replace(':' . $this->bbcode_uid, '', $message);]]></find>
+				<action type="after-add"><![CDATA[		// Smilie Creator
+		// Replace {ROOT_PATH} with the global var $phpbb_root_path
+		$message = str_replace('{ROOT_PATH}', $phpbb_root_path, $message);]]></action>
+			</edit>
+		</open>
+		
+		<open src="includes/functions_posting.php">
+			<edit>
+				<find><![CDATA[	if ($mode == 'window')
+	{
+		page_footer();
+	}]]></find>
+				<action type="before-add"><![CDATA[	if ($mode == 'inline')
+	{    
+		$template->assign_vars(array(
+			'U_SMILIE_CREATOR'       => append_sid("{$phpbb_root_path}smilie_creator.$phpEx", 'mode=text2schild'))
+		);
+	}  ]]></action>
+			</edit>
+		</open>
+		
+		<open src="includes/ucp/ucp_pm_compose.php">
+			<edit>
+				<find><![CDATA[add_form_key('ucp_pm_compose');]]></find>
+				<action type="after-add"><![CDATA[$user->add_lang('mods/lang_smilie_creator');]]></action>
+			</edit>
+		</open>
+		
+		<open src="styles/prosilver/template/posting_editor.html">
+			<edit>
+				<find><![CDATA[		<!-- IF S_SHOW_SMILEY_LINK and S_SMILIES_ALLOWED-->
+			<br /><a href="{U_MORE_SMILIES}" onclick="popup(this.href, 300, 350, '_phpbbsmilies'); return false;">{L_MORE_SMILIES}</a>
+		<!-- ENDIF -->]]></find>
+				<action type="after-add"><![CDATA[		<!-- IF S_SMILIES_ALLOWED and .smiley -->
+			<br /><a href="{U_SMILIE_CREATOR}" onclick="popup(this.href, 450, 600, '_phpbbsmilies'); return false;">{L_SMILIE_CREATOR}</a>
+		<!-- ENDIF -->]]></action>
+			</edit>
+		</open>
+		
+		<diy-instructions lang="en-gb"><![CDATA[After installing this MOD, you have to create two special custom bbcodes
+
+Please follow these steps:
+
+Navigate to:
+ACP - POSTINGS - BBCodes - Add a new BBCode
+Create a new BBcode with the following settings: 
+
+BBCode usage:
+[schild]{INTTEXT}[/schild]
+
+HTML replacement:
+<img src="{ROOT_PATH}text2schild.php?smilie=random&amp;text={INTTEXT}" alt="{L_IMAGE}"/>
+
+Help line:
+[schild] your text [/schild] - This inserts your text into a smilie sign
+
+Settings:
+Display on posting page:  checked.
+
+Now submit the first bbcode.
+
+
+After creating the first bbcode, we have to create the main important bbcode for this MOD.
+Create a new BBcode with the following settings: 
+
+BBCode usage:
+[schild={SIMPLETEXT1},{NUMBER},{SIMPLETEXT2},{SIMPLETEXT3}]{INTTEXT}[/schild]
+
+HTML replacement:
+<img src="{ROOT_PATH}text2schild.php?smilie={SIMPLETEXT1}&amp;shieldshadow={NUMBER}&amp;fontcolor={SIMPLETEXT2}&amp;shadowcolor={SIMPLETEXT3}&amp;text={INTTEXT}" alt="{L_IMAGE}"/>
+
+Now submit the second but main bbcode.
+
+
+After installing all the modifications and creating the two bbcode you have to purge the cache.
+
+
+Support for the style subsliver2: Open the file /templates/subsilver2.xml
+Support for german language: Open the file /languages/de.xml
+Update instructions from older versions: Open the folder /contrib
+
+
+And now: Have fun!]]></diy-instructions>
+		<diy-instructions lang="de"><![CDATA[Nach der Installation des MODs musst Du noch zwei BBCodes erstellen.
+Folge bitte diesen Schritten:
+
+Gehe zum:
+ACP - Beiträge - BBCodes - BBCode hinzufügen
+Erstelle einen neuen BBCode mit folgenden Einstellungen: 
+
+BBCode-Benutzung:
+[schild]{INTTEXT}[/schild]
+
+HTML-Ersetzung:
+<img src="{ROOT_PATH}text2schild.php?smilie=random&amp;text={INTTEXT}" alt="{L_IMAGE}"/>
+
+Tipp-Anzeige:
+[schild] Dein Text [/schild] - Fügt Deinen Text in einen Smilie Schild ein.
+
+Einstellungen:
+Beim Verfassen eines Beitrages anzeigen:  markiert.
+
+Nun sende den ersten BBCode ab.
+
+
+
+Nachdem Du nun den ersten BBCode erstellt hast folgt nun der zweite, allerdings auch wichtigste BBCode dieses MOD.
+
+Erstelle einen neuen BBCode mit folgenden Einstellungen: 
+
+BBCode-Benutzung:
+[schild={SIMPLETEXT1},{NUMBER},{SIMPLETEXT2},{SIMPLETEXT3}]{INTTEXT}[/schild]
+
+HTML-Ersetzung:
+<img src="{ROOT_PATH}text2schild.php?smilie={SIMPLETEXT1}&amp;shieldshadow={NUMBER}&amp;fontcolor={SIMPLETEXT2}&amp;shadowcolor={SIMPLETEXT3}&amp;text={INTTEXT}" alt="{L_IMAGE}"/>
+
+Nun sende den zweiten ( aber wichtigsten ) BBCode ab.
+
+
+Nach der Installation und der Erstellung der zwei BBCodes musst Du noch den Cache des Forums leeren und ggf. die Styles aktualisieren.
+
+Anleitung für den Style subsliver2: Öffne mit Deinem Browser die Datei /templates/subsilver2.xml
+Anleitung für die deutsche Sprachunterstützung: Öffne mit Deinem Browser die Datei /languages/de.xml
+Update Anleitungen von älteren Version findest Du im Ordner /contrib
+
+Und nun: Viel Spass!]]></diy-instructions>
+	</action-group>
+</mod>
