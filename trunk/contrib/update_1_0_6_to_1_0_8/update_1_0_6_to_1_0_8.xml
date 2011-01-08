@@ -38,7 +38,10 @@
 	</header>
 	
 	<action-group>
-		
+	    <copy>
+			<file from="root/adm/mods/smilie_creator_version.php" to="adm/mods/smilie_creator_version.php" />
+	    </copy
+	    
 		<diy-instructions lang="en-gb"><![CDATA[After installing this MOD, you have to update two special custom bbcodes
 
 Please follow these steps:
